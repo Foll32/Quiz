@@ -13,4 +13,6 @@ public static class DefaultTypes
 		{typeof(SingleAnswerVariantsOptionsType), new SingleAnswerVariantsOptionsType()},
 		{typeof(MultipleAnswerVariantsOptionsType), new MultipleAnswerVariantsOptionsType()}
 	};
+
+	public static T GetStatementType<T>() where T : class, IStatementType => StatementTypes[typeof(T)] as T;
 }

@@ -9,9 +9,9 @@ public class TextStatement :
 	
 	public string StatementText { get; }
 
-	public TextStatement(TextStatementType textStatementType, string statementText)
+	public TextStatement(string statementText)
 	{
-		StatementType = textStatementType;
+		StatementType = DefaultTypes.StatementTypes[typeof(TextStatementType)];
 		StatementText = statementText;
 	}
 }
