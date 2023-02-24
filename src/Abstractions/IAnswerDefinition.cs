@@ -11,11 +11,6 @@ public interface IAnswerDefinition
 	public AnswerType Type { get; }
 
 	/// <summary>
-	/// Заметки для ведущего.
-	/// </summary>
-	public FormattedString? NotesForHost { get; }
-	
-	/// <summary>
 	/// Заметки для игроков.
 	/// </summary>
 	public FormattedString? NotesForPlayers { get; }

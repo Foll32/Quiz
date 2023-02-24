@@ -3,7 +3,7 @@
 /// <summary>
 /// Формулировка вопроса, состоящая только из текста.
 /// </summary>
-public interface ITextOnlyFormulation : IFormulation
+public interface ITextOnlyFormulation : IQuestionFormulation
 {
 	/// <summary>
 	/// Текст формулировки вопроса.

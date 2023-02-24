@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Quiz.QuestionStorage.Db.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -22,8 +22,6 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Type = table.Column<int>(type: "int", nullable: false),
-                    NotesForHost = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
                     NotesForPlayers = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     CorrectAnswer = table.Column<string>(type: "varchar(150)", maxLength: 150, nullable: true)
@@ -44,6 +42,8 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Type = table.Column<int>(type: "int", nullable: false),
+                    NotesForHost = table.Column<string>(type: "varchar(2000)", maxLength: 2000, nullable: true)
+                        .Annotation("MySql:CharSet", "utf8mb4"),
                     Text = table.Column<string>(type: "varchar(1000)", maxLength: 1000, nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4")
                 },
@@ -58,8 +58,8 @@ namespace Quiz.QuestionStorage.Db.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                    QuestionFormulationId = table.Column<long>(type: "bigint", nullable: false),
-                    AnswerDefinitionId = table.Column<long>(type: "bigint", nullable: false)
+                    AnswerDefinitionId = table.Column<long>(type: "bigint", nullable: false),
+                    QuestionFormulationId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -82,12 +82,14 @@ namespace Quiz.QuestionStorage.Db.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_AnswerDefinitionId",
                 table: "Questions",
-                column: "AnswerDefinitionId");
+                column: "AnswerDefinitionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Questions_QuestionFormulationId",
                 table: "Questions",
-                column: "QuestionFormulationId");
+                column: "QuestionFormulationId",
+                unique: true);
         }
 
         /// <inheritdoc />

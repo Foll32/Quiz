@@ -13,7 +13,7 @@ public interface IQuestion
 	/// <summary>
 	/// Формулировка вопроса.
 	/// </summary>
-	public IFormulation QuestionFormulation { get; }
+	public IQuestionFormulation QuestionFormulation { get; }
 	
 	/// <summary>
 	/// Формулировка правильного ответа.

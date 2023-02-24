@@ -19,15 +19,11 @@ namespace Quiz.QuestionStorage.Db.Migrations
                 .HasAnnotation("ProductVersion", "7.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Quiz.CommonModels.Answers.AnswerDefinition", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Answers.AnswerDefinition", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
-
-                    b.Property<string>("NotesForHost")
-                        .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
 
                     b.Property<string>("NotesForPlayers")
                         .HasMaxLength(2000)
@@ -45,11 +41,15 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Quiz.CommonModels.Formulations.QuestionFormulation", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Formulations.QuestionFormulation", b =>
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bigint");
+
+                    b.Property<string>("NotesForHost")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -63,7 +63,7 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     b.UseTphMappingStrategy();
                 });
 
-            modelBuilder.Entity("Quiz.CommonModels.Question", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Question", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,16 +77,18 @@ namespace Quiz.QuestionStorage.Db.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AnswerDefinitionId");
+                    b.HasIndex("AnswerDefinitionId")
+                        .IsUnique();
 
-                    b.HasIndex("QuestionFormulationId");
+                    b.HasIndex("QuestionFormulationId")
+                        .IsUnique();
 
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("Quiz.CommonModels.Answers.FreeTextAnswerDefinition", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Answers.FreeTextAnswerDefinition", b =>
                 {
-                    b.HasBaseType("Quiz.CommonModels.Answers.AnswerDefinition");
+                    b.HasBaseType("Quiz.QuestionStorage.Db.Models.Answers.AnswerDefinition");
 
                     b.Property<string>("AdditionalAnswers")
                         .HasMaxLength(1500)
@@ -100,9 +102,9 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     b.HasDiscriminator().HasValue(1);
                 });
 
-            modelBuilder.Entity("Quiz.CommonModels.Formulations.TextOnlyFormulation", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Formulations.TextOnlyFormulation", b =>
                 {
-                    b.HasBaseType("Quiz.CommonModels.Formulations.QuestionFormulation");
+                    b.HasBaseType("Quiz.QuestionStorage.Db.Models.Formulations.QuestionFormulation");
 
                     b.Property<string>("Text")
                         .IsRequired()
@@ -112,23 +114,35 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     b.HasDiscriminator().HasValue(1);
                 });
 
-            modelBuilder.Entity("Quiz.CommonModels.Question", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Question", b =>
                 {
-                    b.HasOne("Quiz.CommonModels.Answers.AnswerDefinition", "AnswerDefinition")
-                        .WithMany()
-                        .HasForeignKey("AnswerDefinitionId")
+                    b.HasOne("Quiz.QuestionStorage.Db.Models.Answers.AnswerDefinition", "AnswerDefinition")
+                        .WithOne("Question")
+                        .HasForeignKey("Quiz.QuestionStorage.Db.Models.Question", "AnswerDefinitionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Quiz.CommonModels.Formulations.QuestionFormulation", "QuestionFormulation")
-                        .WithMany()
-                        .HasForeignKey("QuestionFormulationId")
+                    b.HasOne("Quiz.QuestionStorage.Db.Models.Formulations.QuestionFormulation", "QuestionFormulation")
+                        .WithOne("Question")
+                        .HasForeignKey("Quiz.QuestionStorage.Db.Models.Question", "QuestionFormulationId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("AnswerDefinition");
 
                     b.Navigation("QuestionFormulation");
+                });
+
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Answers.AnswerDefinition", b =>
+                {
+                    b.Navigation("Question")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Formulations.QuestionFormulation", b =>
+                {
+                    b.Navigation("Question")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

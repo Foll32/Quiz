@@ -1,15 +1,18 @@
 using Microsoft.EntityFrameworkCore;
 using Quiz.QuestionStorage.Db;
+using Quiz.QuestionStorage.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // TODO: вынести в конфигурацию.
-builder.Services.AddDbContext<Context>(act =>
+builder.Services.AddDbContext<Context>((serviceProvider, act) =>
 {
-	var connectionString = "Server=localhost;Port=33077;Database=question_storage;Uid=root;Pwd=1qazXSW@;";
+	var conf = serviceProvider.GetRequiredService<IConfiguration>();
+	var connectionString = conf.GetValue<string>("ConnectionStrings:Database");
 	var serverVersion = ServerVersion.Parse("8.0.29");
 	act.UseMySql(connectionString, serverVersion);
 });
+builder.Services.AddAutoMapper(config => config.AddProfile(typeof(AutoMapperProfile)));
 builder.Services.AddControllers();
 
 var app = builder.Build();

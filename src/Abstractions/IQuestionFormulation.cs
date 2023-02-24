@@ -3,10 +3,15 @@
 /// <summary>
 /// Формулировка вопроса.
 /// </summary>
-public interface IFormulation
+public interface IQuestionFormulation
 {
 	/// <summary>
 	/// Тип формулировки вопроса.
 	/// </summary>
 	public FormulationType Type { get; }
+	
+	/// <summary>
+	/// Заметки для ведущего.
+	/// </summary>
+	public FormattedString? NotesForHost { get; }
 }
