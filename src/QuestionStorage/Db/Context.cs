@@ -1,9 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
-using Quiz.Core.Abstractions;
 using Quiz.QuestionStorage.Db.Models;
-using Quiz.QuestionStorage.Db.Models.Answers;
-using Quiz.QuestionStorage.Db.Models.Formulations;
 
 namespace Quiz.QuestionStorage.Db;
 
@@ -16,6 +12,8 @@ public sealed class Context : DbContext
 	internal const int FreeTextAnswerDefinitionAdditionalAnswersTextMaxLength = 1500;
 
 	public DbSet<Question> Questions { get; set; } = null!;
+	public DbSet<FreeTextAnswerDefinition> FreeTextAnswerDefinitions { get; set; } = null!;
+	public DbSet<TextOnlyQuestionFormulation> TextOnlyFormulations { get; set; } = null!;
 
 	public Context(DbContextOptions<Context> options) : base(options)
 	{
@@ -25,39 +23,27 @@ public sealed class Context : DbContext
 	{
 		var questionEntity = modelBuilder.Entity<Question>();
 		questionEntity.HasKey(q => q.Id);
-		questionEntity.Property(q => q.Id).HasValueGenerator<GuidValueGenerator>();
-		questionEntity.HasOne(q => q.AnswerDefinition).WithOne(d => d.Question).HasForeignKey<Question>(q => q.AnswerDefinitionId);
-		questionEntity.HasOne(q => q.QuestionFormulation).WithOne(f => f.Question).HasForeignKey<Question>(q => q.QuestionFormulationId);
 
 		var questionFormulationEntity = modelBuilder.Entity<QuestionFormulation>();
-		questionFormulationEntity.HasKey(f => f.Id);
-		questionFormulationEntity.HasDiscriminator(f => f.Type)
-			.HasValue<TextOnlyFormulation>(FormulationType.TextOnly);
-		questionFormulationEntity.Property(f => f.NotesForHost)
-			.HasConversion<FormattedStringConverter>()
-			.HasMaxLength(QuestionFormulationNotesForHostMaxLength);
+		questionFormulationEntity.UseTpcMappingStrategy();
+		questionFormulationEntity.HasKey(f => f.QuestionId);
+		questionFormulationEntity.Property(f => f.NotesForHost).HasMaxLength(QuestionFormulationNotesForHostMaxLength);
 
-		var textOnlyFormulationEntity = modelBuilder.Entity<TextOnlyFormulation>();
+		var textOnlyFormulationEntity = modelBuilder.Entity<TextOnlyQuestionFormulation>();
 		textOnlyFormulationEntity.HasBaseType<QuestionFormulation>();
-		textOnlyFormulationEntity.Property(f => f.Text)
-			.HasConversion<FormattedStringConverter>()
-			.HasMaxLength(TextOnlyFormulationTextMaxLength);
+		textOnlyFormulationEntity.Property(f => f.Text).HasMaxLength(TextOnlyFormulationTextMaxLength);
 		
 		var answerDefinitionEntity = modelBuilder.Entity<AnswerDefinition>();
-		answerDefinitionEntity.HasKey(d => d.Id);
-		answerDefinitionEntity.HasDiscriminator(d => d.Type)
-			.HasValue<FreeTextAnswerDefinition>(AnswerType.FreeText);
+		answerDefinitionEntity.UseTpcMappingStrategy();
+		answerDefinitionEntity.HasKey(d => d.QuestionId);
 		answerDefinitionEntity.Property(d => d.NotesForPlayers)
-			.HasConversion<FormattedStringConverter>()
 			.HasMaxLength(AnswerDefinitionNotesForPlayersMaxLength);
 		
 		var freeTextAnswerDefinitionEntity = modelBuilder.Entity<FreeTextAnswerDefinition>();
 		freeTextAnswerDefinitionEntity.HasBaseType<AnswerDefinition>();
 		freeTextAnswerDefinitionEntity.Property(d => d.CorrectAnswer)
-			.HasConversion<FormattedStringConverter>()
 			.HasMaxLength(FreeTextAnswerDefinitionCorrectAnswerTextMaxLength);
 		freeTextAnswerDefinitionEntity.Property(d => d.AdditionalAnswers)
-			.HasConversion<FormattedStringCollectionConverter>()
 			.HasMaxLength(FreeTextAnswerDefinitionAdditionalAnswersTextMaxLength);
 	}
 }

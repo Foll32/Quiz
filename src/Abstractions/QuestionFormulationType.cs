@@ -3,7 +3,7 @@
 /// <summary>
 /// Тип формулировки вопроса.
 /// </summary>
-public enum FormulationType
+public enum QuestionFormulationType
 {
 	/// <summary>
 	/// Неопределенная формулировка вопроса.

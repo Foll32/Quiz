@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Quiz.QuestionStorage.Db;
 
@@ -10,22 +11,41 @@ using Quiz.QuestionStorage.Db;
 namespace Quiz.QuestionStorage.Db.Migrations
 {
     [DbContext(typeof(Context))]
-    partial class ContextModelSnapshot : ModelSnapshot
+    [Migration("20230224123743_Initial")]
+    partial class Initial
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "7.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.AnswerDefinition", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Answers.AnswerDefinition", b =>
                 {
                     b.Property<Guid>("QuestionId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
                     b.Property<string>("NotesForPlayers")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.HasKey("QuestionId");
+
+                    b.ToTable((string)null);
+
+                    b.UseTpcMappingStrategy();
+                });
+
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Formulations.QuestionFormulation", b =>
+                {
+                    b.Property<Guid>("QuestionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("NotesForHost")
                         .HasMaxLength(2000)
                         .HasColumnType("varchar(2000)");
 
@@ -53,26 +73,9 @@ namespace Quiz.QuestionStorage.Db.Migrations
                     b.ToTable("Questions");
                 });
 
-            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.QuestionFormulation", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Answers.FreeTextAnswerDefinition", b =>
                 {
-                    b.Property<Guid>("QuestionId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
-
-                    b.Property<string>("NotesForHost")
-                        .HasMaxLength(2000)
-                        .HasColumnType("varchar(2000)");
-
-                    b.HasKey("QuestionId");
-
-                    b.ToTable((string)null);
-
-                    b.UseTpcMappingStrategy();
-                });
-
-            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition", b =>
-                {
-                    b.HasBaseType("Quiz.QuestionStorage.Db.Models.AnswerDefinition");
+                    b.HasBaseType("Quiz.QuestionStorage.Db.Models.Answers.AnswerDefinition");
 
                     b.Property<string>("AdditionalAnswers")
                         .HasMaxLength(1500)
@@ -83,19 +86,19 @@ namespace Quiz.QuestionStorage.Db.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("varchar(150)");
 
-                    b.ToTable("FreeTextAnswerDefinitions");
+                    b.ToTable("FreeTextAnswerDefinition");
                 });
 
-            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation", b =>
+            modelBuilder.Entity("Quiz.QuestionStorage.Db.Models.Formulations.TextOnlyFormulation", b =>
                 {
-                    b.HasBaseType("Quiz.QuestionStorage.Db.Models.QuestionFormulation");
+                    b.HasBaseType("Quiz.QuestionStorage.Db.Models.Formulations.QuestionFormulation");
 
                     b.Property<string>("Text")
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("varchar(1000)");
 
-                    b.ToTable("TextOnlyFormulations");
+                    b.ToTable("TextOnlyFormulation");
                 });
 #pragma warning restore 612, 618
         }

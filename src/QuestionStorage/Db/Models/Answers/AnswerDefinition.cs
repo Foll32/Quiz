@@ -1,14 +1,8 @@
-﻿using Quiz.Core.Abstractions;
+﻿namespace Quiz.QuestionStorage.Db.Models;
 
-namespace Quiz.QuestionStorage.Db.Models.Answers;
-
-public abstract class AnswerDefinition : IAnswerDefinition
+public abstract class AnswerDefinition
 {
-	public long Id { get; init; }
+	public Guid QuestionId { get; init; }
 
-	public AnswerType Type { get; init; }
-	
-	public FormattedString? NotesForPlayers { get; init; }
-
-	public Question Question { get; init; } = null!;
+	public string? NotesForPlayers { get; init; }
 }

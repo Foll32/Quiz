@@ -1,8 +1,5 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Quiz.QuestionStorage.Db;
-using Quiz.QuestionStorage.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using Quiz.QuestionStorage.Services;
 
 namespace Quiz.QuestionStorage.Controllers;
 
@@ -10,28 +7,18 @@ namespace Quiz.QuestionStorage.Controllers;
 [Route("/[controller]")]
 public class QuestionsController : ControllerBase
 {
-	private readonly Context _context;
-	private readonly IMapper _mapper;
+	private readonly IQuestionService _questionService;
 
-	public QuestionsController(Context context, IMapper mapper)
+	public QuestionsController(IQuestionService questionService)
 	{
-		_context = context;
-		_mapper = mapper;
+		_questionService = questionService;
 	}
 
 	[HttpGet("{id:guid}")]
 	public async Task<IActionResult> GetQuestionAsync([FromRoute]Guid id)
 	{
-		var question = await _context.Questions
-			.Include(q => q.AnswerDefinition)
-			.Include(q => q.QuestionFormulation)
-			.FirstOrDefaultAsync(q => q.Id == id);
+		var result = await _questionService.GetQuestionAsync(id);
 
-		if (question is null)
-			return NotFound();
-
-		var result = _mapper.Map<Question>(question);
-		
-		return Ok(result);
+		return result.Match<IActionResult>(Ok, _ => NotFound());
 	}
 }

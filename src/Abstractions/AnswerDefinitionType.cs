@@ -3,7 +3,7 @@
 /// <summary>
 /// Тип формулировки ответа.
 /// </summary>
-public enum AnswerType
+public enum AnswerDefinitionType
 {
 	/// <summary>
 	/// Неопределенный тип ответа.

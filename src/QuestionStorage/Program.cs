@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
+using Quiz.QuestionStorage;
 using Quiz.QuestionStorage.Db;
-using Quiz.QuestionStorage.Mapper;
+using Quiz.QuestionStorage.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<Context>((serviceProvider, act) =>
 });
 builder.Services.AddAutoMapper(config => config.AddProfile(typeof(AutoMapperProfile)));
 builder.Services.AddControllers();
+builder.Services.AddScoped<IQuestionService, QuestionService>();
 
 var app = builder.Build();
 

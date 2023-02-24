@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.Abstractions", "src\Abstractions\Quiz.Abstractions.csproj", "{46782040-E052-4759-8618-CF6F044A31C8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.Core", "src\Abstractions\Quiz.Core.csproj", "{46782040-E052-4759-8618-CF6F044A31C8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quiz.QuestionStorage", "src\QuestionStorage\Quiz.QuestionStorage.csproj", "{4B1DC221-5A13-4AF5-8C44-762B4E272B0C}"
 EndProject
