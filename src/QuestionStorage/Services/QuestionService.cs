@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Runtime.InteropServices.JavaScript;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using OneOf;
 using OneOf.Types;
@@ -9,10 +7,7 @@ using Quiz.QuestionStorage.Db.Models;
 using Quiz.QuestionStorage.Grpc;
 using Quiz.QuestionStorage.Results;
 using Quiz.QuestionStorage.Validators;
-using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
-using OneTextChoiceAnswerDefinition = Quiz.QuestionStorage.Db.Models.OneTextChoiceAnswerDefinition;
 using Question = Quiz.QuestionStorage.Db.Models.Question;
-using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
 
 namespace Quiz.QuestionStorage.Services;
 
