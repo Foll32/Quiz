@@ -9,12 +9,12 @@ public enum AnswerDefinitionType
 	/// Неопределенный тип ответа.
 	/// </summary>
 	None,
-	
+
 	/// <summary>
 	/// Ответ вводится в свободном виде.
 	/// </summary>
 	FreeText,
-	
+
 	/// <summary>
 	/// Один из предложенных текстовых вариантов.
 	/// </summary>

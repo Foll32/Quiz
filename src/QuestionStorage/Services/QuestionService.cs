@@ -16,7 +16,7 @@ internal class QuestionService : IQuestionService
 	{
 		_context = context;
 	}
-	
+
 	public async Task<OneOf<Question, NotFound>> GetQuestionAsync(Guid id)
 	{
 		var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == id);
@@ -25,7 +25,8 @@ internal class QuestionService : IQuestionService
 			: question;
 	}
 
-	public async Task<OneOf<T, NotFound, ValidationError>>GetFormulationAsync<T>(QuestionFormulationType type, Guid questionId, CancellationToken cancellationToken) where T : QuestionFormulation
+	public async Task<OneOf<T, NotFound, ValidationError>> GetFormulationAsync<T>(QuestionFormulationType type, Guid questionId, CancellationToken cancellationToken)
+		where T : QuestionFormulation
 	{
 		switch (type)
 		{
@@ -33,15 +34,16 @@ internal class QuestionService : IQuestionService
 				var formulation = await _context.TextOnlyFormulations.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
 				if (formulation is T textOnlyQuestionFormulation)
 					return textOnlyQuestionFormulation;
-				
+
 				return new NotFound();
 
 			default:
 				return new ValidationError();
 		}
 	}
-	
-	public async Task<OneOf<T, NotFound, ValidationError>> GetAnswerAsync<T>(AnswerDefinitionType type, Guid questionId, CancellationToken cancellationToken) where T : AnswerDefinition
+
+	public async Task<OneOf<T, NotFound, ValidationError>> GetAnswerAsync<T>(AnswerDefinitionType type, Guid questionId, CancellationToken cancellationToken)
+		where T : AnswerDefinition
 	{
 		switch (type)
 		{
@@ -49,7 +51,7 @@ internal class QuestionService : IQuestionService
 				var answerDefinition = await _context.FreeTextAnswerDefinitions.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
 				if (answerDefinition is T freeTextAnswerDefinition)
 					return freeTextAnswerDefinition;
-				
+
 				return new NotFound();
 
 			default:

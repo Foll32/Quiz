@@ -9,12 +9,12 @@ public enum QuestionFormulationType
 	/// Неопределенная формулировка вопроса.
 	/// </summary>
 	None,
-	
+
 	/// <summary>
 	/// Формулировка вопроса, состоящая лишь из текста.
 	/// </summary>
 	TextOnly,
-	
+
 	/// <summary>
 	/// Формулировка вопроса, состоящая из текста и изображения.
 	/// </summary>

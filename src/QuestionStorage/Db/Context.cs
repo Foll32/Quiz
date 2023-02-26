@@ -11,13 +11,13 @@ public sealed class Context : DbContext
 	internal const int FreeTextAnswerDefinitionCorrectAnswerTextMaxLength = 150;
 	internal const int FreeTextAnswerDefinitionAdditionalAnswersTextMaxLength = 1500;
 
-	public DbSet<Question> Questions { get; set; } = null!;
-	public DbSet<FreeTextAnswerDefinition> FreeTextAnswerDefinitions { get; set; } = null!;
-	public DbSet<TextOnlyQuestionFormulation> TextOnlyFormulations { get; set; } = null!;
-
 	public Context(DbContextOptions<Context> options) : base(options)
 	{
 	}
+
+	public DbSet<Question> Questions { get; set; } = null!;
+	public DbSet<FreeTextAnswerDefinition> FreeTextAnswerDefinitions { get; set; } = null!;
+	public DbSet<TextOnlyQuestionFormulation> TextOnlyFormulations { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
 	{
@@ -32,13 +32,13 @@ public sealed class Context : DbContext
 		var textOnlyFormulationEntity = modelBuilder.Entity<TextOnlyQuestionFormulation>();
 		textOnlyFormulationEntity.HasBaseType<QuestionFormulation>();
 		textOnlyFormulationEntity.Property(f => f.Text).HasMaxLength(TextOnlyFormulationTextMaxLength);
-		
+
 		var answerDefinitionEntity = modelBuilder.Entity<AnswerDefinition>();
 		answerDefinitionEntity.UseTpcMappingStrategy();
 		answerDefinitionEntity.HasKey(d => d.QuestionId);
 		answerDefinitionEntity.Property(d => d.NotesForPlayers)
 			.HasMaxLength(AnswerDefinitionNotesForPlayersMaxLength);
-		
+
 		var freeTextAnswerDefinitionEntity = modelBuilder.Entity<FreeTextAnswerDefinition>();
 		freeTextAnswerDefinitionEntity.HasBaseType<AnswerDefinition>();
 		freeTextAnswerDefinitionEntity.Property(d => d.CorrectAnswer)

@@ -6,5 +6,8 @@
 /// <param name="Text">Исходный текст с символами форматирования.</param>
 public record struct FormattedString(string Text)
 {
-	public static explicit operator FormattedString(string text) => new(text);
+	public static explicit operator FormattedString(string text)
+	{
+		return new(text);
+	}
 }

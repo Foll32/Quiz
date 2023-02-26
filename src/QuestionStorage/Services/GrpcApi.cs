@@ -2,20 +2,22 @@
 using Grpc.Core;
 using Quiz.Core.Abstractions;
 using Quiz.QuestionStorage.Grpc;
+using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
+using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
 
 namespace Quiz.QuestionStorage.Services;
 
 public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 {
-	private readonly IQuestionService _questionService;
 	private readonly IMapper _mapper;
+	private readonly IQuestionService _questionService;
 
 	public GrpcApi(IQuestionService questionService, IMapper mapper)
 	{
 		_questionService = questionService;
 		_mapper = mapper;
 	}
-	
+
 	public override Task<Empty> Ping(Empty request, ServerCallContext context)
 	{
 		return Task.FromResult(new Empty());
@@ -38,10 +40,10 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 		if (!Guid.TryParse(request.Value, out var guid))
 			return new TextOnlyQuestionFormulationResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
 
-		var result = await _questionService.GetFormulationAsync<Db.Models.TextOnlyQuestionFormulation>(QuestionFormulationType.TextOnly, guid, default);
+		var result = await _questionService.GetFormulationAsync<TextOnlyQuestionFormulation>(QuestionFormulationType.TextOnly, guid, default);
 
 		return result.Match(
-			f => new TextOnlyQuestionFormulationResponse {Formulation = _mapper.Map<TextOnlyQuestionFormulation>(f)},
+			f => new TextOnlyQuestionFormulationResponse {Formulation = _mapper.Map<Grpc.TextOnlyQuestionFormulation>(f)},
 			_ => new TextOnlyQuestionFormulationResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)},
 			_ => new TextOnlyQuestionFormulationResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)});
 	}
@@ -51,10 +53,10 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 		if (!Guid.TryParse(request.Value, out var guid))
 			return new FreeTextAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
 
-		var result = await _questionService.GetAnswerAsync<Db.Models.FreeTextAnswerDefinition>(AnswerDefinitionType.FreeText, guid, default);
-		
+		var result = await _questionService.GetAnswerAsync<FreeTextAnswerDefinition>(AnswerDefinitionType.FreeText, guid, default);
+
 		return result.Match(
-			d => new FreeTextAnswerDefinitionResponse {Definition = _mapper.Map<FreeTextAnswerDefinition>(d)},
+			d => new FreeTextAnswerDefinitionResponse {Definition = _mapper.Map<Grpc.FreeTextAnswerDefinition>(d)},
 			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)},
 			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)});
 	}
