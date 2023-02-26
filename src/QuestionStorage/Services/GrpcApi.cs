@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using Grpc.Core;
-using Quiz.Core.Abstractions;
 using Quiz.QuestionStorage.Grpc;
+using AnswerDefinitionType = Quiz.Core.Abstractions.AnswerDefinitionType;
 using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
+using QuestionFormulationType = Quiz.Core.Abstractions.QuestionFormulationType;
 using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
 
 namespace Quiz.QuestionStorage.Services;

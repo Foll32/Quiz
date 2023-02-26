@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using Quiz.QuestionStorage.Grpc;
+using AnswerDefinitionType = Quiz.Core.Abstractions.AnswerDefinitionType;
 using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
 using Question = Quiz.QuestionStorage.Db.Models.Question;
+using QuestionFormulationType = Quiz.Core.Abstractions.QuestionFormulationType;
 using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
 
 namespace Quiz.QuestionStorage;
@@ -14,6 +16,10 @@ public class AutoMapperProfile : Profile
 	{
 		CreateMap<Guid, QuestionId>()
 			.ConvertUsing(guid => new QuestionId {Value = guid.ToString()});
+		CreateMap<QuestionFormulationType, Grpc.QuestionFormulationType>()
+			.ConvertUsing(t => (Grpc.QuestionFormulationType)(int)t);
+		CreateMap<AnswerDefinitionType, Grpc.AnswerDefinitionType>()
+			.ConvertUsing(t => (Grpc.AnswerDefinitionType)(int)t);
 		CreateMap<Question, Grpc.Question>()
 			.ForMember(q => q.AnswerType, opt => opt.MapFrom(q => (int) q.AnswerDefinitionType))
 			.ForMember(q => q.FormulationType, opt => opt.MapFrom(q => (int) q.QuestionFormulationType));

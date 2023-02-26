@@ -11,6 +11,18 @@ service QuestionStorage {
   rpc GetFreeTextAnswerDefinition (QuestionId) returns (FreeTextAnswerDefinitionResponse);
 }
 
+enum QuestionFormulationType
+{
+  FORMULATION_TYPE_UNSPECIFIED = 0;
+  FORMULATION_TYPE_TEXT_ONLY = 1;
+}
+
+enum AnswerDefinitionType
+{
+  DEFINITION_TYPE_UNSPECIFIED = 0;
+  DEFINITION_TYPE_FREE_TEXT = 1;
+}
+
 message Empty{
 }
 
@@ -24,8 +36,8 @@ message QuestionId {
 
 message Question {
   QuestionId id = 1;
-  int32 formulation_type = 2;
-  int32 answer_type = 3;
+  QuestionFormulationType formulation_type = 2;
+  AnswerDefinitionType answer_type = 3;
 }
 
 message TextOnlyQuestionFormulation
