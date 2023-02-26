@@ -1,5 +1,3 @@
-﻿using FluentValidation.Results;
+﻿namespace Quiz.QuestionStorage.Results;
 
-namespace Quiz.QuestionStorage.Results;
-
-public record struct ValidationError(IEnumerable<ValidationFailure> Errors);
+public record struct ValidationError;

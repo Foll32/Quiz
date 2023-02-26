@@ -12,6 +12,8 @@
         <PackageReference Include="AutoMapper" Version="12.0.1" />
         <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.0" />
         <PackageReference Include="FluentValidation" Version="11.5.1" />
+        <PackageReference Include="Grpc.AspNetCore" Version="2.51.0" />
+        <PackageReference Include="Grpc.AspNetCore.Server.Reflection" Version="2.51.0" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.3">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -23,6 +25,10 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Abstractions\Quiz.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Protobuf Include="Protos\question_storage.proto" GrpcServices="Server" />
     </ItemGroup>
 
 </Project>

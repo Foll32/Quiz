@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
-using Quiz.QuestionStorage.Contracts;
-using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
+using Quiz.QuestionStorage.Grpc;
 
 namespace Quiz.QuestionStorage;
 
@@ -10,10 +9,32 @@ public class AutoMapperProfile : Profile
 	
 	public AutoMapperProfile()
 	{
-		AllowNullCollections = true;
-		CreateMap<Db.Models.Question, Question>();
-		CreateMap<TextOnlyQuestionFormulation, Contracts.TextOnlyQuestionFormulation>();
+		CreateMap<Db.Models.Question, Question>()
+			.ForMember(q => q.Id, opt => opt.MapFrom(q => new QuestionId{Value = q.Id.ToString()}))
+			.ForMember(q => q.AnswerType, opt => opt.MapFrom(q => (int)q.AnswerDefinitionType))
+			.ForMember(q => q.FormulationType, opt => opt.MapFrom(q => (int)q.QuestionFormulationType));
+		CreateMap<Db.Models.TextOnlyQuestionFormulation, TextOnlyQuestionFormulation>()
+			.ConvertUsing((from, _) =>
+			{
+				var result = new TextOnlyQuestionFormulation {Text = from.Text};
+
+				if (!string.IsNullOrWhiteSpace(from.NotesForHost))
+					result.NotesForHost = from.NotesForHost;
+
+				return result;
+			});
 		CreateMap<Db.Models.FreeTextAnswerDefinition, FreeTextAnswerDefinition>()
-			.ForMember(d => d.AdditionalAnswers, opt => opt.MapFrom((d, _) => d.AdditionalAnswers?.Split(AdditionalAnswersSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries)));
+			.ConvertUsing((from, _) =>
+			{
+				var result = new FreeTextAnswerDefinition {Answer = from.CorrectAnswer};
+				
+				if (!string.IsNullOrWhiteSpace(from.NotesForPlayers))
+					result.NotesForPlayer = from.NotesForPlayers;
+				
+				if (!string.IsNullOrWhiteSpace(from.AdditionalAnswers))
+					result.AdditionalAnswers.AddRange(from.AdditionalAnswers.Split(AdditionalAnswersSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries));
+				
+				return result;
+			});
 	}
 }

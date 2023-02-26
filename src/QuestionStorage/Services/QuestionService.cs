@@ -1,26 +1,20 @@
-﻿using AutoMapper;
-using FluentValidation.Results;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using OneOf;
 using OneOf.Types;
 using Quiz.Core.Abstractions;
-using Quiz.QuestionStorage.Contracts;
 using Quiz.QuestionStorage.Db;
+using Quiz.QuestionStorage.Db.Models;
 using Quiz.QuestionStorage.Results;
-using AnswerDefinition = Quiz.QuestionStorage.Contracts.AnswerDefinition;
-using Question = Quiz.QuestionStorage.Contracts.Question;
 
 namespace Quiz.QuestionStorage.Services;
 
 internal class QuestionService : IQuestionService
 {
 	private readonly Context _context;
-	private readonly IMapper _mapper;
 
-	public QuestionService(Context context, IMapper mapper)
+	public QuestionService(Context context)
 	{
 		_context = context;
-		_mapper = mapper;
 	}
 	
 	public async Task<OneOf<Question, NotFound>> GetQuestionAsync(Guid id)
@@ -28,38 +22,38 @@ internal class QuestionService : IQuestionService
 		var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == id);
 		return question is null
 			? new NotFound()
-			: _mapper.Map<Question>(question);
+			: question;
 	}
 
-	public async Task<OneOf<QuestionFormulation, NotFound, ValidationError>> GetFormulationAsync(int type, Guid questionId, CancellationToken cancellationToken)
+	public async Task<OneOf<T, NotFound, ValidationError>>GetFormulationAsync<T>(QuestionFormulationType type, Guid questionId, CancellationToken cancellationToken) where T : QuestionFormulation
 	{
-		switch ((QuestionFormulationType)type)
+		switch (type)
 		{
 			case QuestionFormulationType.TextOnly:
 				var formulation = await _context.TextOnlyFormulations.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
-				if (formulation is null)
-					return new NotFound();
+				if (formulation is T textOnlyQuestionFormulation)
+					return textOnlyQuestionFormulation;
 				
-				return _mapper.Map<TextOnlyQuestionFormulation>(formulation);
-			
+				return new NotFound();
+
 			default:
-				return new ValidationError(new[] {new ValidationFailure("Type", "Invalid question formulation type")});
+				return new ValidationError();
 		}
 	}
-
-	public async Task<OneOf<AnswerDefinition, NotFound, ValidationError>> GetAnswerAsync(int type, Guid questionId, CancellationToken cancellationToken)
+	
+	public async Task<OneOf<T, NotFound, ValidationError>> GetAnswerAsync<T>(AnswerDefinitionType type, Guid questionId, CancellationToken cancellationToken) where T : AnswerDefinition
 	{
-		switch ((AnswerDefinitionType)type)
+		switch (type)
 		{
 			case AnswerDefinitionType.FreeText:
 				var answerDefinition = await _context.FreeTextAnswerDefinitions.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
-				if (answerDefinition is null)
-					return new NotFound();
+				if (answerDefinition is T freeTextAnswerDefinition)
+					return freeTextAnswerDefinition;
 				
-				return _mapper.Map<FreeTextAnswerDefinition>(answerDefinition);
-			
+				return new NotFound();
+
 			default:
-				return new ValidationError(new[] {new ValidationFailure("Type", "Invalid answer definition type")});
+				return new ValidationError();
 		}
 	}
 }
