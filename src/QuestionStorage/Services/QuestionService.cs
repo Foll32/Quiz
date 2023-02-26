@@ -1,10 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OneOf;
 using OneOf.Types;
-using Quiz.Core.Abstractions;
 using Quiz.QuestionStorage.Db;
 using Quiz.QuestionStorage.Db.Models;
-using Quiz.QuestionStorage.Results;
 
 namespace Quiz.QuestionStorage.Services;
 
@@ -25,18 +23,11 @@ internal class QuestionService : IQuestionService
 			: question;
 	}
 
-	public async Task<OneOf<T, NotFound, ValidationError>> GetFormulationAsync<T>(QuestionFormulationType type, Guid questionId, CancellationToken cancellationToken)
+	public async Task<OneOf<T, NotFound>> GetFormulationAsync<T>(Guid questionId, CancellationToken cancellationToken)
 		where T : QuestionFormulation
 	{
-		IQueryable<QuestionFormulation>? dbSet = type switch
-		{
-			QuestionFormulationType.TextOnly => _context.TextOnlyFormulations,
-			_ => null
-		};
-		
-		if (dbSet is null)
-			return new ValidationError();
-		
+		IQueryable<QuestionFormulation> dbSet = _context.Set<T>();
+
 		var formulation = await dbSet.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
 		if (formulation is T typedFormulation)
 			return typedFormulation;
@@ -45,19 +36,11 @@ internal class QuestionService : IQuestionService
 		
 	}
 
-	public async Task<OneOf<T, NotFound, ValidationError>> GetAnswerAsync<T>(AnswerDefinitionType type, Guid questionId, CancellationToken cancellationToken)
+	public async Task<OneOf<T, NotFound>> GetAnswerAsync<T>(Guid questionId, CancellationToken cancellationToken)
 		where T : AnswerDefinition
 	{
-		IQueryable<AnswerDefinition>? dbSet = type switch
-		{
-			AnswerDefinitionType.FreeText => _context.FreeTextAnswerDefinitions,
-			AnswerDefinitionType.OneTextChoice => _context.OneTextChoiceAnswerDefinitions,
-			_ => null
-		};
-		
-		if (dbSet is null)
-			return new ValidationError();
-		
+		IQueryable<AnswerDefinition> dbSet = _context.Set<T>();
+
 		var answerDefinition = await dbSet.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
 		if (answerDefinition is T typedAnswerDefinition)
 			return typedAnswerDefinition;
