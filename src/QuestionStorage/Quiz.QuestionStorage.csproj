@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Abstractions\Quiz.Core.csproj" />
+        <ProjectReference Include="..\Core\Quiz.Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
