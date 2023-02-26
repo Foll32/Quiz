@@ -9,10 +9,11 @@ public class AutoMapperProfile : Profile
 	
 	public AutoMapperProfile()
 	{
+		CreateMap<Guid, QuestionId>()
+			.ConvertUsing(guid => new QuestionId{Value = guid.ToString()});
 		CreateMap<Db.Models.Question, Question>()
-			.ForMember(q => q.Id, opt => opt.MapFrom(q => new QuestionId{Value = q.Id.ToString()}))
-			.ForMember(q => q.AnswerType, opt => opt.MapFrom(q => (int)q.AnswerDefinitionType))
-			.ForMember(q => q.FormulationType, opt => opt.MapFrom(q => (int)q.QuestionFormulationType));
+			.ForMember(q => q.AnswerType, opt => opt.MapFrom(q => (int) q.AnswerDefinitionType))
+			.ForMember(q => q.FormulationType, opt => opt.MapFrom(q => (int) q.QuestionFormulationType));
 		CreateMap<Db.Models.TextOnlyQuestionFormulation, TextOnlyQuestionFormulation>()
 			.ConvertUsing((from, _) =>
 			{
@@ -36,5 +37,8 @@ public class AutoMapperProfile : Profile
 				
 				return result;
 			});
+
+		CreateMap<ErrorCodes, Error>()
+			.ConvertUsing(code => new Error {Code = (int) code});
 	}
 }

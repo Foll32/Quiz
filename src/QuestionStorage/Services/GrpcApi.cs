@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Google.Protobuf.Collections;
 using Grpc.Core;
 using Quiz.Core.Abstractions;
 using Quiz.QuestionStorage.Grpc;
@@ -31,7 +30,7 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 
 		return result.Match(
 			q => new QuestionResponse {Question = _mapper.Map<Question>(q)},
-			_ => new QuestionResponse {Error = new Error {Code = (int) ErrorCodes.NotFound}});
+			_ => new QuestionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)});
 	}
 
 	public override async Task<TextOnlyQuestionFormulationResponse> GetTextOnlyQuestionFormulation(QuestionId request, ServerCallContext context)
@@ -43,9 +42,8 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 
 		return result.Match(
 			f => new TextOnlyQuestionFormulationResponse {Formulation = _mapper.Map<TextOnlyQuestionFormulation>(f)},
-			//f => new TextOnlyQuestionFormulationResponse {Formulation = new TextOnlyQuestionFormulation{Text = f.Text, NotesForHost = f.NotesForHost ?? string.Empty}},
-			_ => new TextOnlyQuestionFormulationResponse {Error = new Error {Code = (int) ErrorCodes.NotFound}},
-			_ => new TextOnlyQuestionFormulationResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}});
+			_ => new TextOnlyQuestionFormulationResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)},
+			_ => new TextOnlyQuestionFormulationResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)});
 	}
 
 	public override async Task<FreeTextAnswerDefinitionResponse> GetFreeTextAnswerDefinition(QuestionId request, ServerCallContext context)
@@ -57,7 +55,7 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 		
 		return result.Match(
 			d => new FreeTextAnswerDefinitionResponse {Definition = _mapper.Map<FreeTextAnswerDefinition>(d)},
-			_ => new FreeTextAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.NotFound}},
-			_ => new FreeTextAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}});
+			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)},
+			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)});
 	}
 }
