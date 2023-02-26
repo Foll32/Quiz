@@ -10,6 +10,7 @@ public sealed class Context : DbContext
 	internal const int AnswerDefinitionNotesForPlayersMaxLength = 2000;
 	internal const int FreeTextAnswerDefinitionCorrectAnswerTextMaxLength = 150;
 	internal const int FreeTextAnswerDefinitionAdditionalAnswersTextMaxLength = 1500;
+	internal const int OneTextChoiceAnswerDefinitionAdditionalAnswersTextMaxLength = 2000;
 
 	public Context(DbContextOptions<Context> options) : base(options)
 	{
@@ -17,6 +18,7 @@ public sealed class Context : DbContext
 
 	public DbSet<Question> Questions { get; set; } = null!;
 	public DbSet<FreeTextAnswerDefinition> FreeTextAnswerDefinitions { get; set; } = null!;
+	public DbSet<OneTextChoiceAnswerDefinition> OneTextChoiceAnswerDefinitions { get; set; } = null!;
 	public DbSet<TextOnlyQuestionFormulation> TextOnlyFormulations { get; set; } = null!;
 
 	protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,5 +47,10 @@ public sealed class Context : DbContext
 			.HasMaxLength(FreeTextAnswerDefinitionCorrectAnswerTextMaxLength);
 		freeTextAnswerDefinitionEntity.Property(d => d.AdditionalAnswers)
 			.HasMaxLength(FreeTextAnswerDefinitionAdditionalAnswersTextMaxLength);
+		
+		var oneTextChoiceAnswerDefinitionEntity = modelBuilder.Entity<OneTextChoiceAnswerDefinition>();
+		oneTextChoiceAnswerDefinitionEntity.HasBaseType<AnswerDefinition>();
+		oneTextChoiceAnswerDefinitionEntity.Property(d => d.Variants)
+			.HasMaxLength(FreeTextAnswerDefinitionCorrectAnswerTextMaxLength);
 	}
 }

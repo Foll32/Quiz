@@ -28,34 +28,40 @@ internal class QuestionService : IQuestionService
 	public async Task<OneOf<T, NotFound, ValidationError>> GetFormulationAsync<T>(QuestionFormulationType type, Guid questionId, CancellationToken cancellationToken)
 		where T : QuestionFormulation
 	{
-		switch (type)
+		IQueryable<QuestionFormulation>? dbSet = type switch
 		{
-			case QuestionFormulationType.TextOnly:
-				var formulation = await _context.TextOnlyFormulations.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
-				if (formulation is T textOnlyQuestionFormulation)
-					return textOnlyQuestionFormulation;
+			QuestionFormulationType.TextOnly => _context.TextOnlyFormulations,
+			_ => null
+		};
+		
+		if (dbSet is null)
+			return new ValidationError();
+		
+		var formulation = await dbSet.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
+		if (formulation is T typedFormulation)
+			return typedFormulation;
 
-				return new NotFound();
-
-			default:
-				return new ValidationError();
-		}
+		return new NotFound();
+		
 	}
 
 	public async Task<OneOf<T, NotFound, ValidationError>> GetAnswerAsync<T>(AnswerDefinitionType type, Guid questionId, CancellationToken cancellationToken)
 		where T : AnswerDefinition
 	{
-		switch (type)
+		IQueryable<AnswerDefinition>? dbSet = type switch
 		{
-			case AnswerDefinitionType.FreeText:
-				var answerDefinition = await _context.FreeTextAnswerDefinitions.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
-				if (answerDefinition is T freeTextAnswerDefinition)
-					return freeTextAnswerDefinition;
+			AnswerDefinitionType.FreeText => _context.FreeTextAnswerDefinitions,
+			AnswerDefinitionType.OneTextChoice => _context.OneTextChoiceAnswerDefinitions,
+			_ => null
+		};
+		
+		if (dbSet is null)
+			return new ValidationError();
+		
+		var answerDefinition = await dbSet.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
+		if (answerDefinition is T typedAnswerDefinition)
+			return typedAnswerDefinition;
 
-				return new NotFound();
-
-			default:
-				return new ValidationError();
-		}
+		return new NotFound();
 	}
 }

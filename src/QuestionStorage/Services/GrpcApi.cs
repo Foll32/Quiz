@@ -3,6 +3,7 @@ using Grpc.Core;
 using Quiz.QuestionStorage.Grpc;
 using AnswerDefinitionType = Quiz.Core.Abstractions.AnswerDefinitionType;
 using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
+using OneTextChoiceAnswerDefinition = Quiz.QuestionStorage.Db.Models.OneTextChoiceAnswerDefinition;
 using QuestionFormulationType = Quiz.Core.Abstractions.QuestionFormulationType;
 using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
 
@@ -60,5 +61,18 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 			d => new FreeTextAnswerDefinitionResponse {Definition = _mapper.Map<Grpc.FreeTextAnswerDefinition>(d)},
 			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)},
 			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)});
+	}
+
+	public override async Task<OneTextChoiceAnswerDefinitionResponse> GetOneTextChoiceAnswerDefinition(QuestionId request, ServerCallContext context)
+	{
+		if (!Guid.TryParse(request.Value, out var guid))
+			return new OneTextChoiceAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
+
+		var result = await _questionService.GetAnswerAsync<OneTextChoiceAnswerDefinition>(AnswerDefinitionType.OneTextChoice, guid, default);
+
+		return result.Match(
+			d => new OneTextChoiceAnswerDefinitionResponse {Definition = _mapper.Map<Grpc.OneTextChoiceAnswerDefinition>(d)},
+			_ => new OneTextChoiceAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)},
+			_ => new OneTextChoiceAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)});
 	}
 }

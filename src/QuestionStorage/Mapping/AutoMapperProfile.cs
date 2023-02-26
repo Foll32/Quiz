@@ -2,6 +2,7 @@
 using Quiz.QuestionStorage.Grpc;
 using AnswerDefinitionType = Quiz.Core.Abstractions.AnswerDefinitionType;
 using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
+using OneTextChoiceAnswerDefinition = Quiz.QuestionStorage.Db.Models.OneTextChoiceAnswerDefinition;
 using Question = Quiz.QuestionStorage.Db.Models.Question;
 using QuestionFormulationType = Quiz.Core.Abstractions.QuestionFormulationType;
 using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
@@ -10,7 +11,7 @@ namespace Quiz.QuestionStorage;
 
 public class AutoMapperProfile : Profile
 {
-	private const char AdditionalAnswersSeparatorSymbol = '\uFFFF';
+	private const char StringSeparatorSymbol = '\uFFFF';
 
 	public AutoMapperProfile()
 	{
@@ -42,10 +43,23 @@ public class AutoMapperProfile : Profile
 					result.NotesForPlayer = from.NotesForPlayers;
 
 				if (!string.IsNullOrWhiteSpace(from.AdditionalAnswers))
-					result.AdditionalAnswers.AddRange(from.AdditionalAnswers.Split(AdditionalAnswersSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries));
+					result.AdditionalAnswers.AddRange(from.AdditionalAnswers.Split(StringSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries));
 
 				return result;
 			});
+		CreateMap<OneTextChoiceAnswerDefinition, Grpc.OneTextChoiceAnswerDefinition>()
+			.ConvertUsing((from, _) =>
+			{
+				var result = new Grpc.OneTextChoiceAnswerDefinition {CorrectVariant = from.CorrectVariant};
+				
+				result.AnswerVariants.AddRange(from.Variants.Split(StringSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries));
+
+				if (!string.IsNullOrWhiteSpace(from.NotesForPlayers))
+					result.NotesForPlayer = from.NotesForPlayers;
+
+				return result;
+			});
+		
 
 		CreateMap<ErrorCodes, Error>()
 			.ConvertUsing(code => new Error {Code = (int) code});
