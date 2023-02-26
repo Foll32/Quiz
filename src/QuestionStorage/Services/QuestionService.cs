@@ -49,19 +49,22 @@ internal class QuestionService : IQuestionService
 		
 	}
 
-	public async Task<OneOf<T, NotFound>> GetAnswerAsync<T>(Guid questionId, CancellationToken cancellationToken)
+	public async Task<OneOf<T, NotFound>> GetAnswerAsync<T>(Guid questionId, bool withAnswer, CancellationToken cancellationToken)
 		where T : AnswerDefinition
 	{
 		IQueryable<AnswerDefinition> dbSet = _context.Set<T>();
 
 		var answerDefinition = await dbSet.FirstOrDefaultAsync(f => f.QuestionId == questionId, cancellationToken);
-		if (answerDefinition is T typedAnswerDefinition)
-			return typedAnswerDefinition;
-
-		return new NotFound();
+		if (answerDefinition is not T typedAnswerDefinition)
+			return new NotFound();
+		
+		if (!withAnswer)
+			typedAnswerDefinition.ClearAnswer();
+		
+		return typedAnswerDefinition;
 	}
 
-	public async Task<OneOf<Guid, ValidationError>> AddQuestion(NewQuestion newQuestion, CancellationToken cancellationToken)
+	public async Task<OneOf<Guid, ValidationError>> AddQuestion(NewQuestionRequest newQuestion, CancellationToken cancellationToken)
 	{
 		var validationResult = await _newQuestionValidator.ValidateAsync(newQuestion, cancellationToken);
 		if (!validationResult.IsValid)

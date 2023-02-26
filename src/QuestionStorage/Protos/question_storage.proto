@@ -7,10 +7,10 @@ option csharp_namespace = "Quiz.QuestionStorage.Grpc";
 service QuestionStorage {
   rpc Ping (Empty) returns (Empty);  
   rpc GetQuestion (QuestionId) returns (QuestionResponse);
-  rpc GetTextOnlyQuestionFormulation (QuestionId) returns (TextOnlyQuestionFormulationResponse);
-  rpc GetFreeTextAnswerDefinition (QuestionId) returns (FreeTextAnswerDefinitionResponse);
-  rpc GetOneTextChoiceAnswerDefinition (QuestionId) returns (OneTextChoiceAnswerDefinitionResponse);
-  rpc AddQuestion (NewQuestion) returns (AddNewQuestionResponse);
+  rpc GetTextOnlyQuestionFormulation (QuestionFormulationRequest) returns (TextOnlyQuestionFormulationResponse);
+  rpc GetFreeTextAnswerDefinition (AnswerDefinitionRequest) returns (FreeTextAnswerDefinitionResponse);
+  rpc GetOneTextChoiceAnswerDefinition (AnswerDefinitionRequest) returns (OneTextChoiceAnswerDefinitionResponse);
+  rpc AddQuestion (NewQuestionRequest) returns (AddNewQuestionResponse);
 }
 
 enum QuestionFormulationType
@@ -51,7 +51,7 @@ message TextOnlyQuestionFormulation
 
 message FreeTextAnswerDefinition
 {
-  string answer = 1;
+  optional string answer = 1;
   optional string notes_for_player = 2;
   repeated string additional_answers = 3;
 }
@@ -59,12 +59,24 @@ message FreeTextAnswerDefinition
 message OneTextChoiceAnswerDefinition
 {
   repeated string answer_variants = 1;
-  int32 correct_variant = 2;
+  optional int32 correct_variant = 2;
   optional string notes_for_player = 3;
 }
 
-// Данные нового вопроса
-message NewQuestion
+message QuestionFormulationRequest
+{
+  QuestionId id = 1;
+}
+
+message AnswerDefinitionRequest
+{
+  QuestionId id = 1;
+  // Признак того, что описание ответа запрашивается с самим ответом.
+  bool with_correct_answer = 2;
+}
+
+// Запрос на создание нового вопроса
+message NewQuestionRequest
 {
   // Формулировка вопроса
   oneof formulation {

@@ -9,4 +9,9 @@ public abstract class AnswerDefinition
 	public Guid QuestionId { get; set; }
 
 	public string? NotesForPlayers { get; set; }
+
+	public virtual void ClearAnswer()
+	{
+		NotesForPlayers = null;
+	}
 }

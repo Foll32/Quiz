@@ -37,20 +37,33 @@ public class AutoMapperProfile : Profile
 		CreateMap<FreeTextAnswerDefinition, Grpc.FreeTextAnswerDefinition>()
 			.ConvertUsing((from, _) =>
 			{
-				var result = new Grpc.FreeTextAnswerDefinition {Answer = from.CorrectAnswer};
+				var result = new Grpc.FreeTextAnswerDefinition();
+
+				if (string.IsNullOrEmpty(from.CorrectAnswer))
+					result.ClearAnswer();
+				else
+					result.Answer = from.CorrectAnswer;
 
 				if (!string.IsNullOrWhiteSpace(from.NotesForPlayers))
 					result.NotesForPlayer = from.NotesForPlayers;
 
-				if (!string.IsNullOrWhiteSpace(from.AdditionalAnswers))
+				if (string.IsNullOrEmpty(from.AdditionalAnswers))
+					result.ClearAnswer();
+				else
 					result.AdditionalAnswers.AddRange(from.AdditionalAnswers.Split(StringSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries));
+
 
 				return result;
 			});
 		CreateMap<OneTextChoiceAnswerDefinition, Grpc.OneTextChoiceAnswerDefinition>()
 			.ConvertUsing((from, _) =>
 			{
-				var result = new Grpc.OneTextChoiceAnswerDefinition {CorrectVariant = from.CorrectVariant};
+				var result = new Grpc.OneTextChoiceAnswerDefinition();
+				
+				if (from.CorrectVariant is null)
+					result.ClearCorrectVariant();
+				else
+					result.CorrectVariant = (int)from.CorrectVariant;
 				
 				result.AnswerVariants.AddRange(from.Variants.Split(StringSeparatorSymbol, StringSplitOptions.RemoveEmptyEntries));
 
@@ -63,12 +76,12 @@ public class AutoMapperProfile : Profile
 			.ConvertUsing(code => new Grpc.Error {Code = (int) code});
 		
 		
-		CreateMap<Grpc.NewQuestion, QuestionFormulation>()
+		CreateMap<Grpc.NewQuestionRequest, QuestionFormulation>()
 			.ConvertUsing((from, _, context) =>
 			{
 				switch (from.FormulationCase)
 				{
-					case Grpc.NewQuestion.FormulationOneofCase.TextOnlyFormulation:
+					case Grpc.NewQuestionRequest.FormulationOneofCase.TextOnlyFormulation:
 						return context.Mapper.Map<TextOnlyQuestionFormulation>(from.TextOnlyFormulation);
 					default:
 						throw new NotSupportedException();
@@ -85,14 +98,14 @@ public class AutoMapperProfile : Profile
 				return to;
 			});
 		
-		CreateMap<Grpc.NewQuestion, AnswerDefinition>()
+		CreateMap<Grpc.NewQuestionRequest, AnswerDefinition>()
 			.ConvertUsing((from, _, context) =>
 			{
 				switch (from.AnswerCase)
 				{
-					case Grpc.NewQuestion.AnswerOneofCase.FreeTextAnswer:
+					case Grpc.NewQuestionRequest.AnswerOneofCase.FreeTextAnswer:
 						return context.Mapper.Map<FreeTextAnswerDefinition>(from.FreeTextAnswer);
-					case Grpc.NewQuestion.AnswerOneofCase.OneTextChoiceAnswer:
+					case Grpc.NewQuestionRequest.AnswerOneofCase.OneTextChoiceAnswer:
 						return context.Mapper.Map<OneTextChoiceAnswerDefinition>(from.OneTextChoiceAnswer);
 						
 					default:

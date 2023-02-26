@@ -35,9 +35,9 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 			_ => new QuestionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)});
 	}
 
-	public override async Task<TextOnlyQuestionFormulationResponse> GetTextOnlyQuestionFormulation(QuestionId request, ServerCallContext context)
+	public override async Task<TextOnlyQuestionFormulationResponse> GetTextOnlyQuestionFormulation(QuestionFormulationRequest request, ServerCallContext context)
 	{
-		if (!Guid.TryParse(request.Value, out var guid))
+		if (!Guid.TryParse(request.Id.Value, out var guid))
 			return new TextOnlyQuestionFormulationResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
 
 		var result = await _questionService.GetFormulationAsync<TextOnlyQuestionFormulation>(guid, context.CancellationToken);
@@ -47,37 +47,37 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 			_ => new TextOnlyQuestionFormulationResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)});
 	}
 
-	public override async Task<FreeTextAnswerDefinitionResponse> GetFreeTextAnswerDefinition(QuestionId request, ServerCallContext context)
+	public override async Task<FreeTextAnswerDefinitionResponse> GetFreeTextAnswerDefinition(AnswerDefinitionRequest request, ServerCallContext context)
 	{
-		if (!Guid.TryParse(request.Value, out var guid))
+		if (!Guid.TryParse(request.Id.Value, out var guid))
 			return new FreeTextAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
 
-		var result = await _questionService.GetAnswerAsync<FreeTextAnswerDefinition>( guid, context.CancellationToken);
+		var result = await _questionService.GetAnswerAsync<FreeTextAnswerDefinition>(guid, request.WithCorrectAnswer, context.CancellationToken);
 
 		return result.Match(
 			d => new FreeTextAnswerDefinitionResponse {Definition = _mapper.Map<Grpc.FreeTextAnswerDefinition>(d)},
 			_ => new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)});
 	}
 
-	public override async Task<OneTextChoiceAnswerDefinitionResponse> GetOneTextChoiceAnswerDefinition(QuestionId request, ServerCallContext context)
+	public override async Task<OneTextChoiceAnswerDefinitionResponse> GetOneTextChoiceAnswerDefinition(AnswerDefinitionRequest request, ServerCallContext context)
 	{
-		if (!Guid.TryParse(request.Value, out var guid))
+		if (!Guid.TryParse(request.Id.Value, out var guid))
 			return new OneTextChoiceAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
 
-		var result = await _questionService.GetAnswerAsync<OneTextChoiceAnswerDefinition>(guid, context.CancellationToken);
+		var result = await _questionService.GetAnswerAsync<OneTextChoiceAnswerDefinition>(guid, request.WithCorrectAnswer, context.CancellationToken);
 
 		return result.Match(
 			d => new OneTextChoiceAnswerDefinitionResponse {Definition = _mapper.Map<Grpc.OneTextChoiceAnswerDefinition>(d)},
 			_ => new OneTextChoiceAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)});
 	}
 
-	public override async Task<AddNewQuestionResponse> AddQuestion(NewQuestion request, ServerCallContext context)
+	public override async Task<AddNewQuestionResponse> AddQuestion(NewQuestionRequest request, ServerCallContext context)
 	{
 		var result = await _questionService.AddQuestion(request, context.CancellationToken);
 
 		return result.Match(
-			guid => new AddNewQuestionResponse{Id = new QuestionId{Value = guid.ToString()}},
+			guid => new AddNewQuestionResponse {Id = new QuestionId {Value = guid.ToString()}},
 			_ => new AddNewQuestionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}}
-			);
+		);
 	}
 }
