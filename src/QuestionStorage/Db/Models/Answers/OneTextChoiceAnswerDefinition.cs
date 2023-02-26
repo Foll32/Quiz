@@ -1,7 +1,11 @@
-﻿namespace Quiz.QuestionStorage.Db.Models;
+﻿using Quiz.Core.Abstractions;
+
+namespace Quiz.QuestionStorage.Db.Models;
 
 public class OneTextChoiceAnswerDefinition : AnswerDefinition
 {
+	public override AnswerDefinitionType Type => AnswerDefinitionType.OneTextChoice;
+	
 	/// <summary>
 	/// Варианты правильных ответов, объединенных в одну строку.
 	/// </summary>

@@ -1,8 +1,12 @@
-﻿namespace Quiz.QuestionStorage.Db.Models;
+﻿using Quiz.Core.Abstractions;
+
+namespace Quiz.QuestionStorage.Db.Models;
 
 public abstract class QuestionFormulation
 {
-	public Guid QuestionId { get; init; }
+	public Guid QuestionId { get; set; }
 
-	public string? NotesForHost { get; init; }
+	public string? NotesForHost { get; set; }
+
+	public abstract QuestionFormulationType Type { get; }
 }

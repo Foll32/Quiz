@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using Quiz.QuestionStorage.Grpc;
+using Quiz.QuestionStorage.Db.Models;
 using AnswerDefinitionType = Quiz.Core.Abstractions.AnswerDefinitionType;
 using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
 using OneTextChoiceAnswerDefinition = Quiz.QuestionStorage.Db.Models.OneTextChoiceAnswerDefinition;
@@ -15,8 +15,8 @@ public class AutoMapperProfile : Profile
 
 	public AutoMapperProfile()
 	{
-		CreateMap<Guid, QuestionId>()
-			.ConvertUsing(guid => new QuestionId {Value = guid.ToString()});
+		CreateMap<Guid, Grpc.QuestionId>()
+			.ConvertUsing(guid => new Grpc.QuestionId {Value = guid.ToString()});
 		CreateMap<QuestionFormulationType, Grpc.QuestionFormulationType>()
 			.ConvertUsing(t => (Grpc.QuestionFormulationType)(int)t);
 		CreateMap<AnswerDefinitionType, Grpc.AnswerDefinitionType>()
@@ -59,9 +59,76 @@ public class AutoMapperProfile : Profile
 
 				return result;
 			});
+		CreateMap<ErrorCodes, Grpc.Error>()
+			.ConvertUsing(code => new Grpc.Error {Code = (int) code});
 		
+		
+		CreateMap<Grpc.NewQuestion, QuestionFormulation>()
+			.ConvertUsing((from, _, context) =>
+			{
+				switch (from.FormulationCase)
+				{
+					case Grpc.NewQuestion.FormulationOneofCase.TextOnlyFormulation:
+						return context.Mapper.Map<TextOnlyQuestionFormulation>(from.TextOnlyFormulation);
+					default:
+						throw new NotSupportedException();
+				} 
+			});
+		CreateMap<Grpc.TextOnlyQuestionFormulation, TextOnlyQuestionFormulation>()
+			.ConvertUsing((from, _) =>
+			{
+				var to = new TextOnlyQuestionFormulation {Text = from.Text};
+				
+				if (from.HasNotesForHost && !string.IsNullOrWhiteSpace(from.NotesForHost))
+					to.NotesForHost = from.NotesForHost;
+				
+				return to;
+			});
+		
+		CreateMap<Grpc.NewQuestion, AnswerDefinition>()
+			.ConvertUsing((from, _, context) =>
+			{
+				switch (from.AnswerCase)
+				{
+					case Grpc.NewQuestion.AnswerOneofCase.FreeTextAnswer:
+						return context.Mapper.Map<FreeTextAnswerDefinition>(from.FreeTextAnswer);
+					case Grpc.NewQuestion.AnswerOneofCase.OneTextChoiceAnswer:
+						return context.Mapper.Map<OneTextChoiceAnswerDefinition>(from.OneTextChoiceAnswer);
+						
+					default:
+						throw new NotSupportedException();
+				} 
+			});
+		CreateMap<Grpc.FreeTextAnswerDefinition, FreeTextAnswerDefinition>()
+			.ConvertUsing((from, _) =>
+			{
+				var to = new FreeTextAnswerDefinition
+				{
+					CorrectAnswer = from.Answer,
+					AdditionalAnswers = from.AdditionalAnswers.Any() ? string.Join(StringSeparatorSymbol, from.AdditionalAnswers) : null
+				};
+				
+				if (from.HasNotesForPlayer && !string.IsNullOrWhiteSpace(from.NotesForPlayer))
+					to.NotesForPlayers = from.NotesForPlayer;
 
-		CreateMap<ErrorCodes, Error>()
-			.ConvertUsing(code => new Error {Code = (int) code});
+				return to;
+			});
+		CreateMap<Grpc.OneTextChoiceAnswerDefinition, OneTextChoiceAnswerDefinition>()
+			.ConvertUsing((from, _) =>
+			{
+				var to = new OneTextChoiceAnswerDefinition
+				{
+					CorrectVariant = (byte)from.CorrectVariant,
+					Variants = string.Join(StringSeparatorSymbol, from.AnswerVariants)
+				};
+				
+				if (from.HasNotesForPlayer && !string.IsNullOrWhiteSpace(from.NotesForPlayer))
+					to.NotesForPlayers = from.NotesForPlayer;
+
+				return to;
+			});
+
+
+
 	}
 }

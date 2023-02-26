@@ -1,23 +1,36 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices.JavaScript;
+using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using OneOf;
 using OneOf.Types;
 using Quiz.QuestionStorage.Db;
 using Quiz.QuestionStorage.Db.Models;
+using Quiz.QuestionStorage.Grpc;
+using Quiz.QuestionStorage.Results;
+using Quiz.QuestionStorage.Validators;
+using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
+using OneTextChoiceAnswerDefinition = Quiz.QuestionStorage.Db.Models.OneTextChoiceAnswerDefinition;
+using Question = Quiz.QuestionStorage.Db.Models.Question;
+using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
 
 namespace Quiz.QuestionStorage.Services;
 
 internal class QuestionService : IQuestionService
 {
 	private readonly Context _context;
+	private readonly IMapper _mapper;
+	private readonly NewQuestionValidator _newQuestionValidator = new NewQuestionValidator();
 
-	public QuestionService(Context context)
+	public QuestionService(Context context, IMapper mapper)
 	{
 		_context = context;
+		_mapper = mapper;
 	}
 
-	public async Task<OneOf<Question, NotFound>> GetQuestionAsync(Guid id)
+	public async Task<OneOf<Question, NotFound>> GetQuestionAsync(Guid id, CancellationToken cancellationToken)
 	{
-		var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == id);
+		var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == id, cancellationToken);
 		return question is null
 			? new NotFound()
 			: question;
@@ -46,5 +59,34 @@ internal class QuestionService : IQuestionService
 			return typedAnswerDefinition;
 
 		return new NotFound();
+	}
+
+	public async Task<OneOf<Guid, ValidationError>> AddQuestion(NewQuestion newQuestion, CancellationToken cancellationToken)
+	{
+		var validationResult = await _newQuestionValidator.ValidateAsync(newQuestion, cancellationToken);
+		if (!validationResult.IsValid)
+			return new ValidationError();
+
+		var questionId = Guid.NewGuid(); 
+		
+		var formulation = _mapper.Map<QuestionFormulation>(newQuestion);
+		var answerDefinition = _mapper.Map<AnswerDefinition>(newQuestion);
+		
+		var question = new Question
+		{
+			Id = questionId,
+			QuestionFormulationType = formulation.Type,
+			AnswerDefinitionType = answerDefinition.Type
+		};
+		formulation.QuestionId = questionId;
+		answerDefinition.QuestionId = questionId;
+
+		_context.Questions.Add(question);
+		_context.Entry(formulation).Context.Add(formulation);
+		_context.Entry(answerDefinition).Context.Add(answerDefinition);
+
+		await _context.SaveChangesAsync(cancellationToken);
+
+		return questionId;
 	}
 }

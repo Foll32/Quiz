@@ -10,6 +10,7 @@ service QuestionStorage {
   rpc GetTextOnlyQuestionFormulation (QuestionId) returns (TextOnlyQuestionFormulationResponse);
   rpc GetFreeTextAnswerDefinition (QuestionId) returns (FreeTextAnswerDefinitionResponse);
   rpc GetOneTextChoiceAnswerDefinition (QuestionId) returns (OneTextChoiceAnswerDefinitionResponse);
+  rpc AddQuestion (NewQuestion) returns (AddNewQuestionResponse);
 }
 
 enum QuestionFormulationType
@@ -62,6 +63,21 @@ message OneTextChoiceAnswerDefinition
   optional string notes_for_player = 3;
 }
 
+// Данные нового вопроса
+message NewQuestion
+{
+  // Формулировка вопроса
+  oneof formulation {
+    TextOnlyQuestionFormulation text_only_formulation = 1;
+  }
+  
+  // Определение ответа
+  oneof answer {
+    FreeTextAnswerDefinition free_text_answer = 2;
+    OneTextChoiceAnswerDefinition one_text_choice_answer = 3;
+  }
+}
+
 message QuestionResponse{
   oneof response {
     Question question = 1;
@@ -89,6 +105,15 @@ message OneTextChoiceAnswerDefinitionResponse
 {
   oneof response {
     OneTextChoiceAnswerDefinition definition = 1;
+    Error error = 2;
+  }
+}
+
+// Ответ на запрос создания нового вопроса
+message AddNewQuestionResponse
+{
+  oneof response {
+    QuestionId id = 1;
     Error error = 2;
   }
 }

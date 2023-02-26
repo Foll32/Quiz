@@ -15,14 +15,14 @@ builder.Services.AddDbContext<Context>((serviceProvider, act) =>
 builder.Services.AddAutoMapper(config => config.AddProfile(typeof(AutoMapperProfile)));
 builder.Services.AddScoped<IQuestionService, QuestionService>();
 builder.Services.AddGrpc();
-//builder.Services.AddGrpcReflection();
+builder.Services.AddGrpcReflection();
 
 var app = builder.Build();
 
 app.MapGrpcService<GrpcApi>();
-// if (app.Environment.IsDevelopment())
-// {
-// 	app.MapGrpcReflectionService();
-// }
+if (app.Environment.IsDevelopment())
+{
+	app.MapGrpcReflectionService();
+}
 
 app.Run();

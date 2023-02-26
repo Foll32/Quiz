@@ -1,8 +1,12 @@
-﻿namespace Quiz.QuestionStorage.Db.Models;
+﻿using Quiz.Core.Abstractions;
+
+namespace Quiz.QuestionStorage.Db.Models;
 
 public class FreeTextAnswerDefinition : AnswerDefinition
 {
-	public string CorrectAnswer { get; init; } = null!;
+	public override AnswerDefinitionType Type => AnswerDefinitionType.FreeText;
+	
+	public string CorrectAnswer { get; set; } = null!;
 
-	public string? AdditionalAnswers { get; init; }
+	public string? AdditionalAnswers { get; set; }
 }

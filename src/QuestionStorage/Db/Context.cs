@@ -30,7 +30,7 @@ public sealed class Context : DbContext
 		questionFormulationEntity.UseTpcMappingStrategy();
 		questionFormulationEntity.HasKey(f => f.QuestionId);
 		questionFormulationEntity.Property(f => f.NotesForHost).HasMaxLength(QuestionFormulationNotesForHostMaxLength);
-
+		
 		var textOnlyFormulationEntity = modelBuilder.Entity<TextOnlyQuestionFormulation>();
 		textOnlyFormulationEntity.HasBaseType<QuestionFormulation>();
 		textOnlyFormulationEntity.Property(f => f.Text).HasMaxLength(TextOnlyFormulationTextMaxLength);
