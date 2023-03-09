@@ -23,10 +23,10 @@ internal class QuestionService : IQuestionService
 		_mapper = mapper;
 	}
 
-	public async Task<IReadOnlyCollection<Question>> GetQuestionsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
+	public async Task<IReadOnlyCollection<Question>> GetQuestionsAsync(IEnumerable<Guid> questionIds, CancellationToken cancellationToken)
 	{
 		var question = await _context.Questions
-			.Where(q => ids.Contains(q.Id))
+			.Where(q => questionIds.Contains(q.Id))
 			.AsNoTracking()
 			.ToArrayAsync(cancellationToken);
 		return question;
