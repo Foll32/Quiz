@@ -6,7 +6,7 @@ option csharp_namespace = "Quiz.QuestionStorage.Grpc";
 
 service QuestionStorage {
   rpc Ping (Empty) returns (Empty);  
-  rpc GetQuestion (QuestionId) returns (QuestionResponse);
+  rpc GetQuestions (GetQuestionsRequest) returns (GetQuestionsResponse);
   rpc GetTextOnlyQuestionFormulation (QuestionFormulationRequest) returns (TextOnlyQuestionFormulationResponse);
   rpc GetFreeTextAnswerDefinition (AnswerDefinitionRequest) returns (FreeTextAnswerDefinitionResponse);
   rpc GetOneTextChoiceAnswerDefinition (AnswerDefinitionRequest) returns (OneTextChoiceAnswerDefinitionResponse);
@@ -43,6 +43,10 @@ message Question {
   AnswerDefinitionType answer_type = 3;
 }
 
+message QuestionList {
+  repeated Question questions = 1;
+}
+
 message TextOnlyQuestionFormulation
 {
   string text = 1;
@@ -61,6 +65,11 @@ message OneTextChoiceAnswerDefinition
   repeated string answer_variants = 1;
   optional int32 correct_variant = 2;
   optional string notes_for_player = 3;
+}
+
+message GetQuestionsRequest
+{
+  repeated QuestionId id = 1;
 }
 
 message QuestionFormulationRequest
@@ -87,6 +96,14 @@ message NewQuestionRequest
   oneof answer {
     FreeTextAnswerDefinition free_text_answer = 2;
     OneTextChoiceAnswerDefinition one_text_choice_answer = 3;
+  }
+}
+
+message GetQuestionsResponse
+{
+  oneof response {
+    QuestionList questions = 1;
+    Error error = 2;
   }
 }
 

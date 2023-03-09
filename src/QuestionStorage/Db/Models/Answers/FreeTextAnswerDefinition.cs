@@ -6,7 +6,7 @@ public class FreeTextAnswerDefinition : AnswerDefinition
 {
 	public override AnswerDefinitionType Type => AnswerDefinitionType.FreeText;
 	
-	public string? CorrectAnswer { get; set; } = null!;
+	public string? CorrectAnswer { get; set; }
 
 	public string? AdditionalAnswers { get; set; }
 

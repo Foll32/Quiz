@@ -9,7 +9,7 @@ namespace Quiz.QuestionStorage.Services;
 
 public interface IQuestionService
 {
-	Task<OneOf<Question, NotFound>> GetQuestionAsync(Guid id, CancellationToken cancellationToken);
+	Task<IReadOnlyCollection<Question>> GetQuestionsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken);
 
 	Task<OneOf<T, NotFound>> GetFormulationAsync<T>(Guid questionId, CancellationToken cancellationToken) where T : QuestionFormulation;
 

@@ -74,8 +74,16 @@ public class AutoMapperProfile : Profile
 			});
 		CreateMap<ErrorCodes, Grpc.Error>()
 			.ConvertUsing(code => new Grpc.Error {Code = (int) code});
+		CreateMap<IEnumerable<Question>, Grpc.GetQuestionsResponse>()
+			.ConvertUsing((from, _, context) =>
+			{
+				var questionList = new Grpc.QuestionList();
+				questionList.Questions.AddRange(from.Select(q => context.Mapper.Map<Grpc.Question>(q)));
+				return new Grpc.GetQuestionsResponse {Questions = questionList};
+			});
 		
 		
+
 		CreateMap<Grpc.NewQuestionRequest, QuestionFormulation>()
 			.ConvertUsing((from, _, context) =>
 			{

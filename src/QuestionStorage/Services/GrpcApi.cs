@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using Grpc.Core;
 using Quiz.QuestionStorage.Grpc;
+using Quiz.QuestionStorage.Validators;
 using FreeTextAnswerDefinition = Quiz.QuestionStorage.Db.Models.FreeTextAnswerDefinition;
 using OneTextChoiceAnswerDefinition = Quiz.QuestionStorage.Db.Models.OneTextChoiceAnswerDefinition;
 using TextOnlyQuestionFormulation = Quiz.QuestionStorage.Db.Models.TextOnlyQuestionFormulation;
@@ -9,6 +11,8 @@ namespace Quiz.QuestionStorage.Services;
 
 public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 {
+	private static readonly IValidator<GetQuestionsRequest> GetQuestionsRequestValidator = new GetQuestionsRequestValidator();
+	
 	private readonly IMapper _mapper;
 	private readonly IQuestionService _questionService;
 
@@ -23,22 +27,31 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 		return Task.FromResult(new Empty());
 	}
 
-	public override async Task<QuestionResponse> GetQuestion(QuestionId request, ServerCallContext context)
+	public override async Task<GetQuestionsResponse> GetQuestions(GetQuestionsRequest request, ServerCallContext context)
 	{
-		if (!Guid.TryParse(request.Value, out var guid))
-			return new QuestionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
+		if (!(await GetQuestionsRequestValidator.ValidateAsync(request)).IsValid)
+		{
+			return new GetQuestionsResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)};
+		}
 
-		var result = await _questionService.GetQuestionAsync(guid, context.CancellationToken);
+		var ids = new List<Guid>(request.Id.Count);
+		foreach (var id in request.Id)
+		{
+			if (!Guid.TryParse(id.Value, out var guid))
+				return new GetQuestionsResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)};
+			
+			ids.Add(guid);
+		}
 
-		return result.Match(
-			q => new QuestionResponse {Question = _mapper.Map<Question>(q)},
-			_ => new QuestionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.NotFound)});
+		var result = await _questionService.GetQuestionsAsync(ids, context.CancellationToken);
+
+		return _mapper.Map<GetQuestionsResponse>(result);
 	}
 
 	public override async Task<TextOnlyQuestionFormulationResponse> GetTextOnlyQuestionFormulation(QuestionFormulationRequest request, ServerCallContext context)
 	{
 		if (!Guid.TryParse(request.Id.Value, out var guid))
-			return new TextOnlyQuestionFormulationResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
+			return new TextOnlyQuestionFormulationResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)};
 
 		var result = await _questionService.GetFormulationAsync<TextOnlyQuestionFormulation>(guid, context.CancellationToken);
 
@@ -50,7 +63,7 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 	public override async Task<FreeTextAnswerDefinitionResponse> GetFreeTextAnswerDefinition(AnswerDefinitionRequest request, ServerCallContext context)
 	{
 		if (!Guid.TryParse(request.Id.Value, out var guid))
-			return new FreeTextAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
+			return new FreeTextAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)};
 
 		var result = await _questionService.GetAnswerAsync<FreeTextAnswerDefinition>(guid, request.WithCorrectAnswer, context.CancellationToken);
 
@@ -62,7 +75,7 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 	public override async Task<OneTextChoiceAnswerDefinitionResponse> GetOneTextChoiceAnswerDefinition(AnswerDefinitionRequest request, ServerCallContext context)
 	{
 		if (!Guid.TryParse(request.Id.Value, out var guid))
-			return new OneTextChoiceAnswerDefinitionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}};
+			return new OneTextChoiceAnswerDefinitionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)};
 
 		var result = await _questionService.GetAnswerAsync<OneTextChoiceAnswerDefinition>(guid, request.WithCorrectAnswer, context.CancellationToken);
 
@@ -77,7 +90,7 @@ public class GrpcApi : Grpc.QuestionStorage.QuestionStorageBase
 
 		return result.Match(
 			guid => new AddNewQuestionResponse {Id = new QuestionId {Value = guid.ToString()}},
-			_ => new AddNewQuestionResponse {Error = new Error {Code = (int) ErrorCodes.ValidationError}}
+			_ => new AddNewQuestionResponse {Error = _mapper.Map<ErrorCodes, Error>(ErrorCodes.ValidationError)}
 		);
 	}
 }

@@ -15,7 +15,7 @@ internal class QuestionService : IQuestionService
 {
 	private readonly Context _context;
 	private readonly IMapper _mapper;
-	private readonly NewQuestionValidator _newQuestionValidator = new NewQuestionValidator();
+	private readonly NewQuestionRequestValidator _newQuestionRequestValidator = new NewQuestionRequestValidator();
 
 	public QuestionService(Context context, IMapper mapper)
 	{
@@ -23,12 +23,13 @@ internal class QuestionService : IQuestionService
 		_mapper = mapper;
 	}
 
-	public async Task<OneOf<Question, NotFound>> GetQuestionAsync(Guid id, CancellationToken cancellationToken)
+	public async Task<IReadOnlyCollection<Question>> GetQuestionsAsync(IEnumerable<Guid> ids, CancellationToken cancellationToken)
 	{
-		var question = await _context.Questions.FirstOrDefaultAsync(q => q.Id == id, cancellationToken);
-		return question is null
-			? new NotFound()
-			: question;
+		var question = await _context.Questions
+			.Where(q => ids.Contains(q.Id))
+			.AsNoTracking()
+			.ToArrayAsync(cancellationToken);
+		return question;
 	}
 
 	public async Task<OneOf<T, NotFound>> GetFormulationAsync<T>(Guid questionId, CancellationToken cancellationToken)
@@ -61,7 +62,7 @@ internal class QuestionService : IQuestionService
 
 	public async Task<OneOf<Guid, ValidationError>> AddQuestion(NewQuestionRequest newQuestion, CancellationToken cancellationToken)
 	{
-		var validationResult = await _newQuestionValidator.ValidateAsync(newQuestion, cancellationToken);
+		var validationResult = await _newQuestionRequestValidator.ValidateAsync(newQuestion, cancellationToken);
 		if (!validationResult.IsValid)
 			return new ValidationError();
 

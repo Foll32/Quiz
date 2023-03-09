@@ -3,9 +3,9 @@ using Quiz.QuestionStorage.Grpc;
 
 namespace Quiz.QuestionStorage.Validators;
 
-public class NewQuestionValidator : AbstractValidator<NewQuestionRequest>
+public class NewQuestionRequestValidator : AbstractValidator<NewQuestionRequest>
 {
-	public NewQuestionValidator()
+	public NewQuestionRequestValidator()
 	{
 		RuleFor(q => q.AnswerCase).Must(BeDefinedOneOf);
 		RuleFor(q => q.FormulationCase).Must(BeDefinedOneOf);
